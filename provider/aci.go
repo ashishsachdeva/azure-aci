@@ -732,7 +732,7 @@ func (p *ACIProvider) CreatePod(ctx context.Context, pod *v1.Pod) error {
 		"CreationTimestamp": podCreationTimestamp,
 	}
 
-	p.amendVnetResources(&containerGroup, pod)
+	p.amendVnetResources(&containerGroup, pod, ctx)
 	if p.realtimeMetricsExtension != nil {
 		containerGroup.ContainerGroupProperties.Extensions = append(containerGroup.ContainerGroupProperties.Extensions, p.realtimeMetricsExtension)
 	}
@@ -762,13 +762,13 @@ func (p *ACIProvider) createContainerGroup(ctx context.Context, podNS, podName s
 	return err
 }
 
-func (p *ACIProvider) amendVnetResources(containerGroup *aci.ContainerGroup, pod *v1.Pod) {
+func (p *ACIProvider) amendVnetResources(containerGroup *aci.ContainerGroup, pod *v1.Pod, ctx context.Context) {
 	if p.subnetName == "" {
 		return
 	}
 
 	subnetId := pod.Annotations[subnetIdAnnotation]
-	fmt.Printf("Subnet In Request: %v\n", subnetId)
+	log.G(ctx).Infof("Subnet In Request: %v\n", subnetId)
 
 	if subnetId != "" {
 		containerGroup.ContainerGroupProperties.SubnetIds = []*aci.SubnetIdDefinition{{ID: subnetId}}
@@ -776,7 +776,7 @@ func (p *ACIProvider) amendVnetResources(containerGroup *aci.ContainerGroup, pod
 		containerGroup.ContainerGroupProperties.SubnetIds = []*aci.SubnetIdDefinition{&aci.SubnetIdDefinition{ID: "/subscriptions/" + p.vnetSubscriptionID + "/resourceGroups/" + p.vnetResourceGroup + "/providers/Microsoft.Network/virtualNetworks/" + p.vnetName + "/subnets/" + p.subnetName}}
 	}
 
-	fmt.Printf("Subnet in ContainerGroupProps: %v\n", containerGroup.ContainerGroupProperties.SubnetIds)
+	log.G(ctx).Infof("Subnet in ContainerGroupProps: %v\n", containerGroup.ContainerGroupProperties.SubnetIds)
 
 	containerGroup.ContainerGroupProperties.DNSConfig = p.getDNSConfig(pod)
 	containerGroup.ContainerGroupProperties.Extensions = []*aci.Extension{p.kubeProxyExtension}
