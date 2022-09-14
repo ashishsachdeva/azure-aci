@@ -77,6 +77,10 @@ const (
 	containerExitCodePodDeleted int32 = 0
 )
 
+const (
+	subnetIdAnnotation = "virtual-kubelet.io/subnetId"
+)
+
 // ACIProvider implements the virtual-kubelet provider interface and communicates with Azure's ACI APIs.
 type ACIProvider struct {
 	aciClient                *aci.Client
@@ -763,7 +767,12 @@ func (p *ACIProvider) amendVnetResources(containerGroup *aci.ContainerGroup, pod
 		return
 	}
 
-	containerGroup.ContainerGroupProperties.SubnetIds = []*aci.SubnetIdDefinition{&aci.SubnetIdDefinition{ID: "/subscriptions/" + p.vnetSubscriptionID + "/resourceGroups/" + p.vnetResourceGroup + "/providers/Microsoft.Network/virtualNetworks/" + p.vnetName + "/subnets/" + p.subnetName}}
+	if subnetId := pod.Annotations[subnetIdAnnotation]; subnetId != "" {
+		containerGroup.ContainerGroupProperties.SubnetIds = []*aci.SubnetIdDefinition{{ID: subnetId}}
+	} else {
+		containerGroup.ContainerGroupProperties.SubnetIds = []*aci.SubnetIdDefinition{&aci.SubnetIdDefinition{ID: "/subscriptions/" + p.vnetSubscriptionID + "/resourceGroups/" + p.vnetResourceGroup + "/providers/Microsoft.Network/virtualNetworks/" + p.vnetName + "/subnets/" + p.subnetName}}
+	}
+
 	containerGroup.ContainerGroupProperties.DNSConfig = p.getDNSConfig(pod)
 	containerGroup.ContainerGroupProperties.Extensions = []*aci.Extension{p.kubeProxyExtension}
 }
