@@ -732,6 +732,7 @@ func (p *ACIProvider) CreatePod(ctx context.Context, pod *v1.Pod) error {
 		"CreationTimestamp": podCreationTimestamp,
 	}
 
+	log.G(ctx).Infof("Calling Amend VNetResource.")
 	p.amendVnetResources(&containerGroup, pod, ctx)
 	if p.realtimeMetricsExtension != nil {
 		containerGroup.ContainerGroupProperties.Extensions = append(containerGroup.ContainerGroupProperties.Extensions, p.realtimeMetricsExtension)
@@ -763,9 +764,9 @@ func (p *ACIProvider) createContainerGroup(ctx context.Context, podNS, podName s
 }
 
 func (p *ACIProvider) amendVnetResources(containerGroup *aci.ContainerGroup, pod *v1.Pod, ctx context.Context) {
-	if p.subnetName == "" {
-		return
-	}
+	//if p.subnetName == "" {
+	//	return
+	//}
 
 	subnetId := pod.Annotations[subnetIdAnnotation]
 	log.G(ctx).Infof("Subnet In Request: %v\n", subnetId)
