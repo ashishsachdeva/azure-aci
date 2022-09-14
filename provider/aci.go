@@ -767,11 +767,16 @@ func (p *ACIProvider) amendVnetResources(containerGroup *aci.ContainerGroup, pod
 		return
 	}
 
-	if subnetId := pod.Annotations[subnetIdAnnotation]; subnetId != "" {
+	subnetId := pod.Annotations[subnetIdAnnotation]
+	fmt.Printf("Subnet In Request: %v\n", subnetId)
+
+	if subnetId != "" {
 		containerGroup.ContainerGroupProperties.SubnetIds = []*aci.SubnetIdDefinition{{ID: subnetId}}
 	} else {
 		containerGroup.ContainerGroupProperties.SubnetIds = []*aci.SubnetIdDefinition{&aci.SubnetIdDefinition{ID: "/subscriptions/" + p.vnetSubscriptionID + "/resourceGroups/" + p.vnetResourceGroup + "/providers/Microsoft.Network/virtualNetworks/" + p.vnetName + "/subnets/" + p.subnetName}}
 	}
+
+	fmt.Printf("Subnet in ContainerGroupProps: %v\n", containerGroup.ContainerGroupProperties.SubnetIds)
 
 	containerGroup.ContainerGroupProperties.DNSConfig = p.getDNSConfig(pod)
 	containerGroup.ContainerGroupProperties.Extensions = []*aci.Extension{p.kubeProxyExtension}

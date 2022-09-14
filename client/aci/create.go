@@ -46,6 +46,8 @@ func (c *Client) CreateContainerGroup(ctx context.Context, resourceGroup, contai
 		return nil, fmt.Errorf("Expanding URL with parameters failed: %v", err)
 	}
 
+	fmt.Printf("Request with subnet: %v\n", req)
+
 	// Send the request.
 	resp, err := c.hc.Do(req)
 	if err != nil {
