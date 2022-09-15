@@ -773,6 +773,7 @@ func (p *ACIProvider) amendVnetResources(containerGroup *aci.ContainerGroup, pod
 
 	if subnetId != "" {
 		containerGroup.ContainerGroupProperties.SubnetIds = []*aci.SubnetIdDefinition{{ID: subnetId}}
+		containerGroup.ContainerGroupProperties.IPAddress.Type = "Private"
 	} else {
 		containerGroup.ContainerGroupProperties.SubnetIds = []*aci.SubnetIdDefinition{&aci.SubnetIdDefinition{ID: "/subscriptions/" + p.vnetSubscriptionID + "/resourceGroups/" + p.vnetResourceGroup + "/providers/Microsoft.Network/virtualNetworks/" + p.vnetName + "/subnets/" + p.subnetName}}
 	}
